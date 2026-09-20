@@ -1,6 +1,12 @@
 import { useInspectorContext } from "../app/InspectorContext";
+import type { Theme } from "../hooks/useTheme";
 
-export function Header() {
+interface Props {
+  theme: Theme;
+  onToggleTheme: () => void;
+}
+
+export function Header({ theme, onToggleTheme }: Props) {
   const m = useInspectorContext();
   return (
     <header className="topbar">
@@ -22,6 +28,17 @@ export function Header() {
       </a>
       <div className="topbar-right">
         <span className="local-indicator">Local workspace</span>
+        <button
+          id="theme-toggle"
+          className="button secondary small theme-toggle"
+          type="button"
+          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          aria-pressed={theme === "dark"}
+          onClick={onToggleTheme}
+        >
+          <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
+          {theme === "dark" ? "Light mode" : "Dark mode"}
+        </button>
       </div>
     </header>
   );

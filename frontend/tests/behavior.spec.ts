@@ -9,6 +9,30 @@ import {
   waveform,
 } from "./fixtures";
 
+test("uses the system theme by default and preserves an explicit theme choice", async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: "dark" });
+  await mockApi(page);
+  await page.goto("/");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(page.locator("body")).toHaveCSS(
+    "background-color",
+    "rgb(18, 18, 18)",
+  );
+  await expect(page.locator("#theme-toggle")).toHaveAccessibleName(
+    "Switch to light mode",
+  );
+
+  await page.locator("#theme-toggle").click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  expect(await page.evaluate(() => localStorage.getItem("declick-theme"))).toBe(
+    "light",
+  );
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+});
+
 test("filters, ordering, per-file selections, and shared export panel", async ({
   page,
 }) => {

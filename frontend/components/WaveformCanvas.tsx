@@ -36,7 +36,11 @@ export function WaveformCanvas({
     onReadout?.("Hover to inspect a sample");
     const observer = new ResizeObserver(draw);
     observer.observe(canvas);
-    return () => observer.disconnect();
+    window.addEventListener("declickthemechange", draw);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("declickthemechange", draw);
+    };
   }, [wave, item, zoom, radius, preview, mode, view, onReadout]);
   return (
     <canvas
