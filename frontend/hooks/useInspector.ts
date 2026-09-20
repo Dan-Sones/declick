@@ -148,6 +148,7 @@ export function useInspector() {
   const candidateList = useRef<HTMLDivElement>(null);
   const quickNo = useRef<HTMLButtonElement>(null);
   const quickRestart = useRef<HTMLButtonElement>(null);
+  const keepMinimapFocus = useRef(false);
   const timestamp = useRef<HTMLSpanElement>(null);
   const [copyLabel, setCopyLabel] = useState("Copy");
   const [wave, setWave] = useState<Waveform | null>(null);
@@ -302,6 +303,10 @@ export function useInspector() {
   }, [s.view]);
   useEffect(() => {
     if (s.view !== "quick") return;
+    if (keepMinimapFocus.current) {
+      keepMinimapFocus.current = false;
+      return;
+    }
     if (quickItem) quickNo.current?.focus({ preventScroll: true });
     else quickRestart.current?.focus();
   }, [s.view, s.quickIndex, s.replay, quickItem]);
@@ -411,6 +416,18 @@ export function useInspector() {
       eventId: s.queue[s.quickIndex + 1]?.id ?? s.eventId,
       detailVersion: s.detailVersion + 1,
     }));
+  }
+  function jumpQuick(id: number) {
+    const index = s.queue.findIndex((candidate) => candidate.id === id);
+    if (s.view !== "quick" || s.queueFileId !== s.fileId || index < 0) return;
+    keepMinimapFocus.current = true;
+    quickAudio.unlock();
+    patch({
+      quickIndex: index,
+      eventId: id,
+      replay: s.replay + 1,
+      detailVersion: s.detailVersion + 1,
+    });
   }
   function previousQuick() {
     if (s.view !== "quick" || s.quickIndex <= 0) return;
@@ -579,6 +596,7 @@ export function useInspector() {
     goQuick,
     decideQuick,
     previousQuick,
+    jumpQuick,
     replayQuick,
     scan,
     importAudioFiles,

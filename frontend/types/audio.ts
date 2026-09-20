@@ -14,7 +14,12 @@ export interface Candidate {
   spans?: [number, number, number][];
   repair_error?: string | null;
 }
+export interface WaveformOverview {
+  frames: number;
+  buckets: [number, number][];
+}
 export interface Recording {
+  overview?: WaveformOverview;
   id: string;
   name: string;
   path: string;

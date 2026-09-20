@@ -113,7 +113,7 @@ test("quick keyboard review, previous, revised decisions, replay and completion"
   await expect(page.locator("#quick-status")).toContainText("too long");
   await page.keyboard.press("n");
   await expect(page.locator("#quick-progress")).toHaveText(
-    "Review complete · 4 candidates reviewed",
+    "End of review queue · 4 candidates",
   );
   await expect(page.locator("#quick-time")).toHaveText("2 staged for repair");
   await expect(page.locator("#quick-restart")).toBeFocused();

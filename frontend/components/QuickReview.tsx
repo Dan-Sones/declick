@@ -1,6 +1,7 @@
 import { useInspectorContext } from "../app/InspectorContext";
 import type { Confidence } from "../types/audio";
 import { WaveformCanvas } from "./WaveformCanvas";
+import { QuickMinimap } from "./QuickMinimap";
 import { RepairPanel } from "./RepairPanel";
 
 export function QuickReview() {
@@ -32,13 +33,20 @@ export function QuickReview() {
           </select>
         </label>
       </div>
-      <div className="quick-pills">
-        <span id="quick-progress" className="pill">
+      <QuickMinimap
+        recording={recording}
+        candidates={s.queue}
+        currentId={quickItem?.id}
+        selected={selected}
+        onSelect={m.jumpQuick}
+      />
+      <div className="quick-details">
+        <span id="quick-progress" className="quick-detail">
           {quickItem
             ? `${s.quickIndex + 1} / ${s.queue.length}`
-            : `Review complete · ${s.queue.length} candidates reviewed`}
+            : `End of review queue · ${s.queue.length} candidates`}
         </span>
-        <span id="quick-time" className="pill mono">
+        <span id="quick-time" className="mono">
           {quickItem
             ? quickItem.timestamp
             : `${selected.size} staged for repair`}
@@ -46,19 +54,19 @@ export function QuickReview() {
         <span
           id="quick-confidence"
           data-confidence={quickItem?.level}
-          className={`pill ${quickItem ? "" : "hidden"}`}
+          className={`quick-detail ${quickItem ? "" : "hidden"}`}
         >
           {quickItem &&
             `${quickItem.level} confidence · ${quickItem.confidence.toFixed(3)}`}
         </span>
         <span
           id="quick-duration"
-          className={`pill ${quickItem ? "" : "hidden"}`}
+          className={`quick-detail ${quickItem ? "" : "hidden"}`}
         >
           {quickItem &&
             `${quickItem.duration_ms.toFixed(3)} ms · Ch ${quickItem.channels.join(", ")}`}
         </span>
-        <span className="pill safe-pill">Original protected</span>
+        <span className="quick-protected">Original protected</span>
       </div>
       <div className={`comparison-grid ${quickItem ? "" : "hidden"}`}>
         <article className="plot-card">
@@ -109,7 +117,7 @@ export function QuickReview() {
       <p id="quick-status" role="status" aria-live="polite">
         {quickItem
           ? m.quickStatus
-          : "All done. Export your selected repairs below as a separate copy. Nothing has been exported yet."}
+          : "End of review queue. Revisit candidates using the timeline, or export your selected repairs below as a separate copy. Nothing has been exported yet."}
       </p>
       <div className="quick-actions">
         <button
@@ -148,9 +156,9 @@ export function QuickReview() {
         </button>
       </div>
       <p>
-        P goes back · Y stages · N leaves unchanged · M replays original. Going
-        back keeps your decisions; press Y or N to revise them. Export a new
-        copy when ready.
+        Select a point on the overview to jump and listen. P goes back · Y
+        stages · N leaves unchanged · M replays original. Going back keeps your
+        decisions; press Y or N to revise them. Export a new copy when ready.
       </p>
       <button
         id="quick-restart"
