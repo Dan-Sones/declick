@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "music-click-detector"
+version = "0.1.0"
+description = "Conservative detector for unwanted digital clicks and pops in music recordings"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.3",
+    "scipy>=1.18.1",
+    "soundfile>=0.14.0",
+]
+
+[project.scripts]
+detect-clicks = "click_detector.cli:main"
+click-detector-ui = "click_detector.web:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/click_detector"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.coverage.run]
+source = ["click_detector"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
