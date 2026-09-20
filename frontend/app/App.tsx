@@ -7,13 +7,15 @@ import { RepairPanel } from "../components/RepairPanel";
 import { EmptyState } from "../components/EmptyState";
 import { Detail } from "../components/Detail";
 import { QuickReview } from "../components/QuickReview";
+import { useTheme } from "../hooks/useTheme";
 
 export function App() {
   const m = useInspector();
+  const { theme, toggleTheme } = useTheme();
   const { s } = m;
   return (
     <InspectorContext.Provider value={m}>
-      <Header />
+      <Header theme={theme} onToggleTheme={toggleTheme} />
       <main>
         <Home />
         <nav id="view-nav" className="view-nav">

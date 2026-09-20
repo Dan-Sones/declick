@@ -13,7 +13,33 @@
   --green: #2b6250;
   --green-light: #eaf2ea;
   --red: #c36551;
+  --chart-grid: #eef1e9;
+  --chart-grid-vertical: #f2f4ef;
+  --chart-label: #89967f;
+  --chart-caption: #929d89;
+  --chart-region: rgb(195 101 81 / 11%);
+  --chart-original: #bbc4b7;
+  --chart-hover: #86957c;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #101714;
+  --surface: #18211c;
+  --ink: #e8eee9;
+  --muted: #aab8ad;
+  --line: #33443a;
+  --green: #79bc97;
+  --green-light: #1e3729;
+  --red: #f09682;
+  --chart-grid: #2a382f;
+  --chart-grid-vertical: #233128;
+  --chart-label: #aebcaf;
+  --chart-caption: #bac6bc;
+  --chart-region: rgb(240 150 130 / 20%);
+  --chart-original: #829184;
+  --chart-hover: #c0d0c2;
 }
 #file-drop-zone.drag-over {
   background: #e1f0e2;
@@ -1082,6 +1108,121 @@ kbd {
 }
 .page-foot > span:last-child {
   @apply text-[8px] tracking-[1.4px];
+}
+
+/* Keep every surface distinct in dark mode while retaining the green repair cues. */
+:root[data-theme="dark"] #file-drop-zone.drag-over {
+  background: #203b2b;
+  box-shadow: 0 0 0 5px rgb(121 188 151 / 18%);
+}
+:root[data-theme="dark"] #quick-confidence[data-confidence="high"] {
+  color: #9edbb2;
+  background: #183b27;
+  border-color: #427c55;
+}
+:root[data-theme="dark"] #quick-confidence[data-confidence="medium"] {
+  color: #f1ce83;
+  background: #443513;
+  border-color: #866622;
+}
+:root[data-theme="dark"] #quick-confidence[data-confidence="low"] {
+  color: #f1a69b;
+  background: #48241f;
+  border-color: #87453d;
+}
+:root[data-theme="dark"] .file-picker,
+:root[data-theme="dark"] .topbar,
+:root[data-theme="dark"] .scan-bar {
+  background: #16201a;
+  border-color: #3b4d41;
+}
+:root[data-theme="dark"] .file-picker {
+  border-color: #668474;
+}
+:root[data-theme="dark"] .file-picker:hover,
+:root[data-theme="dark"] .secondary:hover,
+:root[data-theme="dark"] .file-button:hover,
+:root[data-theme="dark"] .candidate-button:hover,
+:root[data-theme="dark"] .icon-button:hover {
+  background: #26362c;
+}
+:root[data-theme="dark"] body #quick-dialog,
+:root[data-theme="dark"] .workspace,
+:root[data-theme="dark"] .icon-button,
+:root[data-theme="dark"] .inline-control select {
+  background: var(--surface);
+}
+:root[data-theme="dark"] .pill,
+:root[data-theme="dark"] .event-summary,
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] .count,
+:root[data-theme="dark"] kbd {
+  background: #202c25;
+  border-color: #3b4b41;
+}
+:root[data-theme="dark"] .safe-pill {
+  border-color: #365e45;
+}
+:root[data-theme="dark"] .candidate-row,
+:root[data-theme="dark"] .candidate-button,
+:root[data-theme="dark"] .evidence-row {
+  border-color: #2b3a31;
+}
+:root[data-theme="dark"] .candidate-row.chosen,
+:root[data-theme="dark"] .file-button.selected,
+:root[data-theme="dark"] .candidate-button.selected {
+  background: #203c2b;
+  border-color: #416b4f;
+}
+:root[data-theme="dark"] .repair-panel {
+  background: #17281d;
+  border-color: #3e6149;
+}
+:root[data-theme="dark"] .repair-note,
+:root[data-theme="dark"] .fine-print,
+:root[data-theme="dark"] .detail-foot {
+  color: #a8b7a8 !important;
+}
+:root[data-theme="dark"] #repair-result {
+  border-color: #365e45;
+}
+:root[data-theme="dark"] .local-indicator,
+:root[data-theme="dark"] .intro .eyebrow,
+:root[data-theme="dark"] .source-note,
+:root[data-theme="dark"] #scan-status,
+:root[data-theme="dark"] .candidate-score,
+:root[data-theme="dark"] .candidate-bottom,
+:root[data-theme="dark"] .sidebar-empty,
+:root[data-theme="dark"] .sidebar-foot,
+:root[data-theme="dark"] .empty-tag,
+:root[data-theme="dark"] .copy-button,
+:root[data-theme="dark"] .event-metric .level-tag,
+:root[data-theme="dark"] .plot-caption,
+:root[data-theme="dark"] .plot-footer,
+:root[data-theme="dark"] .evidence-row dt,
+:root[data-theme="dark"] .page-foot {
+  color: #b3c4b5;
+}
+:root[data-theme="dark"] .error {
+  background: #46231e;
+  border-color: #884a3e;
+  color: #ffc4b8;
+}
+:root[data-theme="dark"] input::placeholder {
+  color: #8f9d92;
+}
+:root[data-theme="dark"] .plot-footer {
+  background: #142019;
+  border-color: #2b3a31;
+}
+:root[data-theme="dark"] .region-swatch {
+  background: #8a4c40;
+}
+:root[data-theme="dark"] .empty-wave i {
+  background: #76997c;
+}
+:root[data-theme="dark"] .empty-wave i:nth-child(7) {
+  background: #d38370;
 }
 @media (min-width: 1500px) {
   .canvas-wrap {

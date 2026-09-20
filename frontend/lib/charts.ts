@@ -9,6 +9,13 @@ export const colors = [
   "#b36c88",
 ];
 
+function chartColor(name: string, fallback: string) {
+  return (
+    getComputedStyle(document.documentElement).getPropertyValue(name).trim() ||
+    fallback
+  );
+}
+
 export function chartGeometry(
   canvas: HTMLCanvasElement,
   wave: Waveform | null,
@@ -78,36 +85,43 @@ export function drawChart(
   const g = chartGeometry(canvas, wave, zoom, radius);
   if (!g || !wave || !item) return;
   const { first, last, center, min, max, left, right, top, bottom, x, y } = g;
+  const grid = chartColor("--chart-grid", "#eef1e9");
+  const gridVertical = chartColor("--chart-grid-vertical", "#f2f4ef");
+  const axisLabel = chartColor("--chart-label", "#89967f");
+  const caption = chartColor("--chart-caption", "#929d89");
+  const region = chartColor("--chart-region", "rgba(195,101,81,.11)");
+  const original = chartColor("--chart-original", "#bbc4b7");
+  const hover = chartColor("--chart-hover", "#86957c");
   ctx.font = "9px ui-monospace, SFMono-Regular, Menlo, monospace";
   ctx.lineWidth = 1;
   for (let tick = 0; tick <= 4; tick++) {
     const value = min + ((max - min) * tick) / 4;
     const yy = y(value);
-    ctx.strokeStyle = "#eef1e9";
+    ctx.strokeStyle = grid;
     ctx.beginPath();
     ctx.moveTo(left, yy);
     ctx.lineTo(right, yy);
     ctx.stroke();
-    ctx.fillStyle = "#89967f";
+    ctx.fillStyle = axisLabel;
     ctx.textAlign = "right";
     ctx.fillText(value.toFixed(max - min < 0.003 ? 5 : 3), left - 9, yy + 3);
   }
   for (let tick = 0; tick <= 4; tick++) {
     const index = first + ((last - first) * tick) / 4;
     const xx = x(index);
-    ctx.strokeStyle = "#f2f4ef";
+    ctx.strokeStyle = gridVertical;
     ctx.beginPath();
     ctx.moveTo(xx, top);
     ctx.lineTo(xx, bottom);
     ctx.stroke();
-    ctx.fillStyle = "#89967f";
+    ctx.fillStyle = axisLabel;
     ctx.textAlign = "center";
     const label = zoom
       ? String(Math.round(index - center))
       : ((wave.start_sample + index) / wave.sample_rate).toFixed(3);
     ctx.fillText(label, xx, bottom + 17);
   }
-  ctx.fillStyle = "#929d89";
+  ctx.fillStyle = caption;
   ctx.textAlign = "center";
   ctx.fillText(
     zoom ? "Samples relative to detection" : "Time in source file (seconds)",
@@ -119,7 +133,7 @@ export function drawChart(
   ctx.rect(left, top, right - left, bottom - top);
   ctx.clip();
   if (zoom) {
-    ctx.fillStyle = "rgba(195,101,81,.11)";
+    ctx.fillStyle = region;
     for (const [, start, end] of item.spans || [
       [0, item.sample_index, item.sample_index + item.duration_samples - 1],
     ]) {
@@ -141,7 +155,7 @@ export function drawChart(
     return;
   }
   if (repaired) {
-    ctx.strokeStyle = "#bbc4b7";
+    ctx.strokeStyle = original;
     ctx.lineWidth = 1;
     ctx.setLineDash([3, 3]);
     wave.channels.forEach((channel) => {
@@ -180,7 +194,7 @@ export function drawChart(
   ctx.stroke();
   ctx.setLineDash([]);
   if (hoverIndex !== null) {
-    ctx.strokeStyle = "#86957c";
+    ctx.strokeStyle = hover;
     ctx.beginPath();
     ctx.moveTo(x(hoverIndex), top);
     ctx.lineTo(x(hoverIndex), bottom);
