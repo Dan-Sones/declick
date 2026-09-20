@@ -1,0 +1,33 @@
+{
+  "name": "click-detector-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "npm run typecheck && npm run build && playwright test",
+    "test:ui": "playwright test --ui",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write app components hooks lib types styles tests main.tsx build.mjs playwright.config.ts tsconfig.json package.json README.md",
+    "format:check": "prettier --check app components hooks lib types styles tests main.tsx build.mjs playwright.config.ts tsconfig.json package.json README.md"
+  },
+  "dependencies": {
+    "effect": "^3.22.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.6.2",
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "esbuild": "0.28.2",
+    "pixelmatch": "^7.2.0",
+    "pngjs": "^7.0.0",
+    "postcss": "^8.5.28",
+    "prettier": "^3.9.8",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2"
+  }
+}

@@ -126,11 +126,13 @@ def test_http_assets_and_actual_waveform(http_ui) -> None:
     server, state = http_ui
     status, content_type, data = request(server, "GET", "/")
     assert status == 200 and content_type.startswith("text/html")
-    assert b"Sample-level detail" in data
-    assert b"<title>Declick" in data and b'aria-label="Declick home"' in data
+    assert b'<div id="root"></div>' in data
+    assert b"<title>Declick" in data and b'src="/app.js"' in data
     assert b"Click Detector" not in data
     for asset in ("/style.css", "/app.js"):
         assert request(server, "GET", asset)[0] == 200
+    # The packaged local bundle supplies the React UI without a CDN or Node.
+    assert b"Sample-level detail" in request(server, "GET", "/app.js")[2]
     result = next(iter(state.results.values()))
     status, _, data = request(server, "GET", f"/api/waveform?file={result.id}&event=0&context=20")
     assert status == 200
