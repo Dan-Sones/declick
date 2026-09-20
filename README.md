@@ -182,6 +182,9 @@ The synthetic suite covers a clean sine, silence, a one-sample spike, a permanen
 uv run pytest
 ```
 
+The React frontend has a separate TypeScript and browser test suite. See
+[frontend/README.md](frontend/README.md) for setup, builds, and visual comparisons.
+
 ## Privacy and generated files
 
 Keep recordings, imported working copies, repaired exports, reports, and diagnostic plots private. Reports can contain full source paths and audio metadata. Generated output directories and common audio formats are excluded from Git; do not force-add them. Tests create synthetic audio at runtime, so no real recordings are required to run the suite.

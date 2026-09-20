@@ -234,3 +234,11 @@ click-diagnostics/
 *.logicx/
 .DS_Store
 .env.*
+
+# Frontend dependencies and browser test artifacts
+node_modules/
+playwright-report/
+test-results/
+
+# Python's generic lib/ ignore must not hide frontend source modules.
+!frontend/lib/
