@@ -13,6 +13,7 @@
   --green: #2b6250;
   --green-light: #eaf2ea;
   --red: #c36551;
+  --focus: #5f7e9d;
   --chart-grid: #eef1e9;
   --chart-grid-vertical: #f2f4ef;
   --chart-label: #89967f;
@@ -25,21 +26,22 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #101714;
-  --surface: #18211c;
-  --ink: #e8eee9;
-  --muted: #aab8ad;
-  --line: #33443a;
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --ink: #e8e8e8;
+  --muted: #b5b5b5;
+  --line: #3c3c3c;
   --green: #79bc97;
-  --green-light: #1e3729;
+  --green-light: #23352a;
   --red: #f09682;
-  --chart-grid: #2a382f;
-  --chart-grid-vertical: #233128;
-  --chart-label: #aebcaf;
-  --chart-caption: #bac6bc;
+  --focus: #96badd;
+  --chart-grid: #353535;
+  --chart-grid-vertical: #292929;
+  --chart-label: #bdbdbd;
+  --chart-caption: #c7c7c7;
   --chart-region: rgb(240 150 130 / 20%);
-  --chart-original: #829184;
-  --chart-hover: #c0d0c2;
+  --chart-original: #969696;
+  --chart-hover: #d0d0d0;
 }
 #file-drop-zone.drag-over {
   background: #e1f0e2;
@@ -422,7 +424,7 @@ input:focus,
 select:focus,
 button:focus-visible,
 a:focus-visible {
-  outline: 2px solid #6d9982;
+  outline: 2px solid var(--focus);
   outline-offset: 3px;
 }
 h1,
@@ -1112,8 +1114,8 @@ kbd {
 
 /* Keep every surface distinct in dark mode while retaining the green repair cues. */
 :root[data-theme="dark"] #file-drop-zone.drag-over {
-  background: #203b2b;
-  box-shadow: 0 0 0 5px rgb(121 188 151 / 18%);
+  background: #2a2a2a;
+  box-shadow: 0 0 0 5px rgb(150 186 221 / 18%);
 }
 :root[data-theme="dark"] #quick-confidence[data-confidence="high"] {
   color: #9edbb2;
@@ -1133,18 +1135,18 @@ kbd {
 :root[data-theme="dark"] .file-picker,
 :root[data-theme="dark"] .topbar,
 :root[data-theme="dark"] .scan-bar {
-  background: #16201a;
-  border-color: #3b4d41;
+  background: #1a1a1a;
+  border-color: #474747;
 }
 :root[data-theme="dark"] .file-picker {
-  border-color: #668474;
+  border-color: #717171;
 }
 :root[data-theme="dark"] .file-picker:hover,
 :root[data-theme="dark"] .secondary:hover,
 :root[data-theme="dark"] .file-button:hover,
 :root[data-theme="dark"] .candidate-button:hover,
 :root[data-theme="dark"] .icon-button:hover {
-  background: #26362c;
+  background: #2a2a2a;
 }
 :root[data-theme="dark"] body #quick-dialog,
 :root[data-theme="dark"] .workspace,
@@ -1157,34 +1159,34 @@ kbd {
 :root[data-theme="dark"] select,
 :root[data-theme="dark"] .count,
 :root[data-theme="dark"] kbd {
-  background: #202c25;
-  border-color: #3b4b41;
+  background: #282828;
+  border-color: #484848;
 }
 :root[data-theme="dark"] .safe-pill {
-  border-color: #365e45;
+  border-color: #466653;
 }
 :root[data-theme="dark"] .candidate-row,
 :root[data-theme="dark"] .candidate-button,
 :root[data-theme="dark"] .evidence-row {
-  border-color: #2b3a31;
+  border-color: #383838;
 }
 :root[data-theme="dark"] .candidate-row.chosen,
 :root[data-theme="dark"] .file-button.selected,
 :root[data-theme="dark"] .candidate-button.selected {
-  background: #203c2b;
-  border-color: #416b4f;
+  background: #2a312c;
+  border-color: #4a6553;
 }
 :root[data-theme="dark"] .repair-panel {
-  background: #17281d;
-  border-color: #3e6149;
+  background: #202420;
+  border-color: #4a6553;
 }
 :root[data-theme="dark"] .repair-note,
 :root[data-theme="dark"] .fine-print,
 :root[data-theme="dark"] .detail-foot {
-  color: #a8b7a8 !important;
+  color: #b8b8b8 !important;
 }
 :root[data-theme="dark"] #repair-result {
-  border-color: #365e45;
+  border-color: #4a6553;
 }
 :root[data-theme="dark"] .local-indicator,
 :root[data-theme="dark"] .intro .eyebrow,
@@ -1201,7 +1203,7 @@ kbd {
 :root[data-theme="dark"] .plot-footer,
 :root[data-theme="dark"] .evidence-row dt,
 :root[data-theme="dark"] .page-foot {
-  color: #b3c4b5;
+  color: #bdbdbd;
 }
 :root[data-theme="dark"] .error {
   background: #46231e;
@@ -1212,8 +1214,8 @@ kbd {
   color: #8f9d92;
 }
 :root[data-theme="dark"] .plot-footer {
-  background: #142019;
-  border-color: #2b3a31;
+  background: #191919;
+  border-color: #383838;
 }
 :root[data-theme="dark"] .region-swatch {
   background: #8a4c40;

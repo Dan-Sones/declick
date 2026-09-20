@@ -10,7 +10,7 @@
         const saved = localStorage.getItem("declick-theme");
         const dark = saved === "dark" || (!saved && matchMedia("(prefers-color-scheme: dark)").matches);
         document.documentElement.dataset.theme = dark ? "dark" : "light";
-        document.querySelector('meta[name="theme-color"]').content = dark ? "#101714" : "#eef1ed";
+        document.querySelector('meta[name="theme-color"]').content = dark ? "#121212" : "#eef1ed";
       } catch {}
     })();
   </script>
