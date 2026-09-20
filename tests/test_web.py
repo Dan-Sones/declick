@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import csv
 import hashlib
 from http.client import HTTPConnection
 import io
@@ -37,7 +36,7 @@ def scan(path: Path) -> ScanState:
     return state
 
 
-def test_scan_waveform_preview_and_csv_preserve_source(recording: Path) -> None:
+def test_scan_waveform_preview_preserves_source(recording: Path) -> None:
     before = hashlib.sha256(recording.read_bytes()).hexdigest()
     state = scan(recording)
     summary = state.snapshot()
@@ -55,10 +54,6 @@ def test_scan_waveform_preview_and_csv_preserve_source(recording: Path) -> None:
     data, sr = sf.read(io.BytesIO(preview_audio(result, event)), always_2d=True)
     assert sr == 48_000 and data.shape[1] == 2
     assert len(data) <= 2 * sr + 1
-    rows = list(csv.DictReader(io.StringIO(state.csv().decode())))
-    assert len(rows) == 1
-    assert rows[0]["channel"] == "2"
-    assert int(rows[0]["sample_index"]) == 19_000
     assert hashlib.sha256(recording.read_bytes()).hexdigest() == before
     assert "files" not in state.snapshot(summary["revision"])
 
@@ -137,7 +132,7 @@ def test_http_assets_and_actual_waveform(http_ui) -> None:
     status, _, data = request(server, "GET", f"/api/waveform?file={result.id}&event=0&context=20")
     assert status == 200
     assert json.loads(data)["center_sample"] == 19_000
-    assert request(server, "GET", "/api/report.csv")[1].startswith("text/csv")
+    assert request(server, "GET", "/api/report.csv")[0] == 404
     assert request(server, "GET", f"/api/audio?file={result.id}&event=0")[2][:4] == b"RIFF"
 
 

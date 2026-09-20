@@ -43,12 +43,11 @@ The inspector provides:
 - A marked detection position and approximate event span, plus the measurements behind the score.
 - Timestamp copying and previous/next controls (left/right arrow keys when not editing a control).
 - Playback of up to two seconds around each candidate, at its original level.
-- **Export CSV** to download the complete current scan, independent of the on-screen filter.
 - Checkboxes to choose which candidates to repair, an original/repaired waveform comparison, and **Export repaired copy**.
 
 Scans run in the background and process one recording at a time. The UI keeps metadata and reads only short audio windows when you select candidates. Audio previews are generated in memory as browser-compatible 16-bit WAV copies; source audio is never rewritten. All application assets and audio processing are local, with no external web services or additional dependencies.
 
-The server binds to `127.0.0.1:8765`. Leave the terminal running while you use it, and press Ctrl+C to stop. Results are kept for the current server session; export the CSV before closing it if you want to keep them. To choose another port or open the URL yourself:
+The server binds to `127.0.0.1:8765`. Leave the terminal running while you use it, and press Ctrl+C to stop. Results are kept for the current server session. To choose another port or open the URL yourself:
 
 ```bash
 uv run click-detector-ui --port 8766 --no-browser

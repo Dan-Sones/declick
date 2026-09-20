@@ -2,7 +2,6 @@ import { useInspectorContext } from "../app/InspectorContext";
 
 export function Header() {
   const m = useInspectorContext();
-  const { s } = m;
   return (
     <header className="topbar">
       <a
@@ -23,15 +22,6 @@ export function Header() {
       </a>
       <div className="topbar-right">
         <span className="local-indicator">Local workspace</span>
-        <a
-          id="export"
-          href="/api/report.csv"
-          download
-          className={`button secondary small ${s.files.length ? "" : "disabled"}`}
-          aria-disabled={!s.files.length}
-        >
-          ↓ Export CSV
-        </a>
       </div>
     </header>
   );
