@@ -184,12 +184,6 @@ export async function mockApi(page: Page, initial = snapshot()) {
       model.snapshot = { ...snapshot(), revision: model.snapshot.revision + 1 };
       return route.fulfill({ status: 202, json: {} });
     }
-    if (path === "/api/report.csv")
-      return route.fulfill({
-        contentType: "text/csv",
-        body: "file,timestamp\nsynthetic.wav,0.395833\n",
-        headers: { "Content-Disposition": 'attachment; filename="report.csv"' },
-      });
     return route.fulfill({
       body: "synthetic export",
       headers: { "Content-Disposition": 'attachment; filename="export.txt"' },

@@ -9,11 +9,12 @@ import {
   waveform,
 } from "./fixtures";
 
-test("filters, ordering, per-file selections, shared export panel and downloads", async ({
+test("filters, ordering, per-file selections, and shared export panel", async ({
   page,
 }) => {
   const model = await mockApi(page);
   await openDetail(page);
+  await expect(page.locator("#export")).toHaveCount(0);
   await expect(page.locator(".candidate-button.selected")).toContainText(
     candidates[1].timestamp,
   );
@@ -51,9 +52,6 @@ test("filters, ordering, per-file selections, shared export panel and downloads"
   );
   await page.locator("#go-quick").click();
   await expect(page.locator("#quick-repair-slot #repair-result")).toBeVisible();
-  const download = page.waitForEvent("download");
-  await page.locator("#export").click();
-  expect((await download).suggestedFilename()).toBe("click-report.csv");
   await page.locator("#go-detail").click();
   await page.locator("#clear-selection").click();
   await expect(page.locator("#repair-result")).toBeHidden();

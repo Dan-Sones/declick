@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import csv
 from dataclasses import asdict, dataclass
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -23,7 +22,7 @@ import soundfile as sf
 from .analysis import AudioStats, analyse_audio
 from .audio import discover_audio_files, read_audio
 from .detector import Detection, Sensitivity, detect_array
-from .reporting import CSV_FIELDS, format_timestamp, rows_for_csv
+from .reporting import format_timestamp
 from .repair import (
     RepairError, export_repaired_copy, file_hash, pcm_layout, plan_repairs, repair_reason,
 )
@@ -170,16 +169,6 @@ class ScanState:
                 raise KeyError("That candidate is no longer available. Select a current candidate.")
             return result, result.events[event_id]
 
-    def csv(self) -> bytes:
-        with self.lock:
-            results = list(self.results.values())
-        output = io.StringIO(newline="")
-        writer = csv.DictWriter(output, fieldnames=CSV_FIELDS)
-        writer.writeheader()
-        for result in results:
-            writer.writerows(rows_for_csv(result.events, {result.path: result.stats.sample_rate}))
-        return output.getvalue().encode("utf-8")
-
     def repair(self, file_id: str, selected: list[int]) -> dict:
         if not self.export_lock.acquire(blocking=False):
             raise RuntimeError("An export is already running.")
@@ -295,8 +284,6 @@ class UIHandler(BaseHTTPRequestHandler):
             "default-src 'self'; script-src 'self'; style-src 'self'; "
             "img-src 'self' data:; media-src 'self' blob:; frame-ancestors 'none'",
         )
-        if content_type.startswith("text/csv"):
-            self.send_header("Content-Disposition", 'attachment; filename="click-report.csv"')
         self.end_headers()
         try:
             self.wfile.write(body)
@@ -347,8 +334,6 @@ class UIHandler(BaseHTTPRequestHandler):
         try:
             if url.path == "/api/state":
                 self._json(self.server.state.snapshot(int(query.get("revision", ["-1"])[0])))
-            elif url.path == "/api/report.csv":
-                self._send(self.server.state.csv(), "text/csv; charset=utf-8")
             elif url.path == "/api/download":
                 self._download(query.get("id", [""])[0], query.get("report", ["0"])[0] == "1")
             elif url.path in {"/api/waveform", "/api/audio"}:
