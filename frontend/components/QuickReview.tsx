@@ -64,6 +64,22 @@ export function QuickReview() {
             `${quickItem.duration_ms.toFixed(3)} ms · Ch ${quickItem.channels.join(", ")}`}
         </span>
         <span className="quick-protected">Original protected</span>
+        {quickItem && (
+          <label className="inline-control">
+            Graph scale{" "}
+            <select
+              id="quick-sample-zoom"
+              aria-label="Quick review graph scale"
+              value={s.sampleZoom}
+              onChange={(e) => m.patch({ sampleZoom: e.target.value })}
+            >
+              <option value="24">±24 samples</option>
+              <option value="48">±48 samples</option>
+              <option value="96">±96 samples</option>
+              <option value="192">±192 samples</option>
+            </select>
+          </label>
+        )}
       </div>
       <div className={`comparison-grid ${quickItem ? "" : "hidden"}`}>
         <article className="plot-card">

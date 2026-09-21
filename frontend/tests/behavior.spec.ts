@@ -130,6 +130,54 @@ test("quick keyboard review, previous, revised decisions, replay and completion"
   await expect(page.locator("#quick-progress")).toHaveText("1 / 2");
 });
 
+for (const width of [1440, 390]) {
+  test(`quick graph scales redraw both charts and persist at ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 1000 });
+    const model = await mockApi(page);
+    await openDetail(page);
+    await page.locator("#quick-start").click();
+    await expect(page.locator("#quick-fix-note")).toContainText(
+      "Only the shaded samples change",
+    );
+    const scale = page.getByRole("combobox", {
+      name: "Quick review graph scale",
+    });
+    const charts = page.locator("#quick-chart, #quick-fixed-chart");
+    const images = () =>
+      charts.evaluateAll((nodes) =>
+        nodes.map((node) => (node as HTMLCanvasElement).toDataURL()),
+      );
+    await expect(scale).toHaveValue("24");
+    const requests = model.waveforms.length;
+    for (const radius of ["48", "96", "192", "24"]) {
+      const before = await images();
+      await scale.selectOption(radius);
+      await expect
+        .poll(async () => {
+          const after = await images();
+          return after.every((image, i) => image !== before[i]);
+        })
+        .toBe(true);
+      await expect(page.locator("#quick-progress")).toHaveText("1 / 4");
+    }
+    expect(model.waveforms).toHaveLength(requests);
+    await scale.selectOption("96");
+    await page.locator("#quick-no").click();
+    await expect(page.locator("#quick-progress")).toHaveText("2 / 4");
+    await expect(scale).toHaveValue("96");
+    await page.locator("#go-detail").click();
+    await expect(page.locator("#sample-zoom")).toHaveValue("96");
+    await page.locator("#sample-zoom").selectOption("24");
+    await page.locator("#go-quick").click();
+    await expect(scale).toHaveValue("24");
+    await scale.focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator("#quick-progress")).toHaveText("2 / 4");
+  });
+}
+
 test("waveform controls, hover, timestamp copy and arrow navigation", async ({
   page,
   context,
