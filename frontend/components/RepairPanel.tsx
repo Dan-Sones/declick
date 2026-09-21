@@ -37,11 +37,6 @@ export function RepairPanel() {
           {s.exporting ? "Exporting & verifying…" : "Export repaired copy"}
         </button>
       </div>
-      <p className="repair-note">
-        New file, same format, sample rate, bit depth, channels, timing, and
-        embedded metadata. Interpolation estimates missing audio; audition the
-        result.
-      </p>
       <div
         id="repair-result"
         role="status"

@@ -1500,3 +1500,28 @@ kbd {
     gap: 6px;
   }
 }
+
+.minimap-ignored-key {
+  color: var(--red);
+  margin-left: 10px;
+}
+.minimap-marker[data-ignored="true"] > span {
+  color: var(--red);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+#quick-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.quick-heading > label {
+  flex-shrink: 0;
+}
+
+#quick-dialog #quick-fix-note.quick-chart-key {
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--muted);
+  margin: 6px 0 12px;
+}

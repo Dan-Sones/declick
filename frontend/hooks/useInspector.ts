@@ -46,6 +46,7 @@ interface State {
   confidence: Confidence;
   sort: string;
   selections: Map<string, Set<number>>;
+  ignored: Map<string, Set<number>>;
   exporting: boolean;
   exported: (RepairReport & { fileId: string }) | null;
   error: string;
@@ -75,6 +76,7 @@ const initial: State = {
   confidence: "all",
   sort: "time",
   selections: new Map(),
+  ignored: new Map(),
   exporting: false,
   exported: null,
   error: "",
@@ -117,6 +119,7 @@ function resetScan(s: State): State {
     eventId: null,
     revision: -1,
     selections: new Map(),
+    ignored: new Map(),
     exported: null,
     pendingReview: true,
     queue: [],
@@ -142,12 +145,13 @@ export function useInspector() {
   const item = recording?.events.find((item) => item.id === s.eventId);
   const events = visibleEvents(recording, s.confidence, s.sort);
   const selected = s.selections.get(s.fileId || "") || new Set<number>();
+  const ignored = s.ignored.get(s.fileId || "") || new Set<number>();
   const quickItem = s.queue[s.quickIndex];
   const audioRef = useRef<HTMLAudioElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const candidateList = useRef<HTMLDivElement>(null);
   const quickNo = useRef<HTMLButtonElement>(null);
-  const quickRestart = useRef<HTMLButtonElement>(null);
+  const quickStatusRef = useRef<HTMLParagraphElement>(null);
   const keepMinimapFocus = useRef(false);
   const timestamp = useRef<HTMLSpanElement>(null);
   const [copyLabel, setCopyLabel] = useState("Copy");
@@ -308,7 +312,7 @@ export function useInspector() {
       return;
     }
     if (quickItem) quickNo.current?.focus({ preventScroll: true });
-    else quickRestart.current?.focus();
+    else quickStatusRef.current?.focus({ preventScroll: true });
   }, [s.view, s.quickIndex, s.replay, quickItem]);
 
   function selectEvent(id: number | null) {
@@ -355,7 +359,13 @@ export function useInspector() {
       if (checked) ids.add(id);
       else ids.delete(id);
       selections.set(s.fileId, ids);
-      return { ...s, selections, exported: null };
+      const ignored = new Map(s.ignored);
+      if (checked) {
+        const ignoredIds = new Set(ignored.get(s.fileId));
+        ignoredIds.delete(id);
+        ignored.set(s.fileId, ignoredIds);
+      }
+      return { ...s, selections, ignored, exported: null };
     });
   }
   function selectShown(clear = false) {
@@ -368,6 +378,10 @@ export function useInspector() {
         ]);
     patch({
       selections: new Map(s.selections).set(s.fileId, ids),
+      ignored: new Map(s.ignored).set(
+        s.fileId,
+        new Set([...ignored].filter((id) => !ids.has(id))),
+      ),
       exported: null,
     });
   }
@@ -409,9 +423,17 @@ export function useInspector() {
       quickAudio.setStatus(quickItem.repair_error);
       return;
     }
+    quickAudio.unlock();
     toggleRepair(quickItem.id, stage);
     set((s) => ({
       ...s,
+      ignored:
+        s.fileId && !stage
+          ? new Map(s.ignored).set(
+              s.fileId,
+              new Set([...(s.ignored.get(s.fileId) || []), quickItem.id]),
+            )
+          : s.ignored,
       quickIndex: s.quickIndex + 1,
       eventId: s.queue[s.quickIndex + 1]?.id ?? s.eventId,
       detailVersion: s.detailVersion + 1,
@@ -431,6 +453,7 @@ export function useInspector() {
   }
   function previousQuick() {
     if (s.view !== "quick" || s.quickIndex <= 0) return;
+    quickAudio.unlock();
     patch({
       quickIndex: s.quickIndex - 1,
       eventId: s.queue[s.quickIndex - 1].id,
@@ -445,10 +468,24 @@ export function useInspector() {
   useEffect(() => {
     const keydown = (key: KeyboardEvent) => {
       const tag = document.activeElement?.tagName;
-      if (key.altKey || key.ctrlKey || key.metaKey) return;
+      if (
+        key.defaultPrevented ||
+        key.altKey ||
+        key.ctrlKey ||
+        key.metaKey ||
+        (document.activeElement as HTMLElement | null)?.isContentEditable
+      )
+        return;
       if (s.view === "quick") {
         if (["INPUT", "SELECT", "TEXTAREA"].includes(tag || "") || key.repeat)
           return;
+        if (["ArrowLeft", "ArrowRight"].includes(key.key)) {
+          key.preventDefault();
+          const next =
+            s.queue[s.quickIndex + (key.key === "ArrowLeft" ? -1 : 1)];
+          if (next) jumpQuick(next.id);
+          return;
+        }
         const letter = key.key.toLowerCase();
         if (letter === "p") {
           key.preventDefault();
@@ -486,6 +523,7 @@ export function useInspector() {
     patch({ error: "", status: "scanning" });
     try {
       await run(api.scan(s.sourcePath, s.sensitivity));
+      quickAudio.silence();
       scanGeneration.current++;
       set(resetScan);
     } catch (error) {
@@ -525,6 +563,7 @@ export function useInspector() {
       if (chosen.size > 2 * 1024 ** 3)
         throw new Error("Choose a file smaller than 2 GiB.");
       const result = await run(api.import(chosen));
+      quickAudio.silence();
       scanGeneration.current++;
       set((s) => ({
         ...resetScan(s),
@@ -574,6 +613,7 @@ export function useInspector() {
     item,
     events,
     selected,
+    ignored,
     quickItem,
     wave,
     plotStatus,
@@ -582,7 +622,7 @@ export function useInspector() {
     fileInput,
     candidateList,
     quickNo,
-    quickRestart,
+    quickStatusRef,
     timestamp,
     copyLabel,
     quickStatus: quickAudio.status,

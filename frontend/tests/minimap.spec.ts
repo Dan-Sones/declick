@@ -133,3 +133,76 @@ for (const theme of ["light", "dark"] as const) {
     });
   }
 }
+
+test("ignored markers retain their status and can be staged again", async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  await mockApi(page);
+  await openDetail(page);
+  await page.locator("#quick-start").click();
+  const markers = page.locator(".minimap-marker");
+  await page.locator("#quick-no").click();
+  await expect(markers.first()).toHaveAttribute("data-ignored", "true");
+  await expect(markers.first()).toHaveAccessibleName(/ignored/);
+  await expect(markers.nth(1)).toHaveAttribute("data-ignored", "false");
+  await expect(markers.first().locator("span")).toHaveCSS(
+    "color",
+    "rgb(195, 101, 81)",
+  );
+  await markers.first().click();
+  await expect(markers.first().locator("span")).toHaveCSS(
+    "color",
+    "rgb(195, 101, 81)",
+  );
+  await page.locator("#quick-filter").selectOption("high");
+  await expect(markers.first()).toHaveAttribute("data-ignored", "true");
+  await page.locator("#go-detail").click();
+  await page.locator(".file-button").nth(1).click();
+  await page.locator("#quick-start").click();
+  await expect(markers.first()).toHaveAttribute("data-ignored", "false");
+  await page.locator("#go-detail").click();
+  await page.locator(".file-button").first().click();
+  await page.locator("#quick-start").click();
+  await expect(markers.first()).toHaveAttribute("data-ignored", "true");
+  await page.locator("#quick-yes").click();
+  await expect(markers.first()).toHaveAttribute("data-ignored", "false");
+  await expect(markers.first()).toHaveAttribute("data-staged", "true");
+});
+
+test("Quick review arrows select and play without changing decisions", async ({
+  page,
+}) => {
+  const model = await mockApi(page);
+  await openDetail(page);
+  await page.locator("#quick-start").click();
+  await expect(page.locator("#quick-no")).toBeFocused();
+  await page.keyboard.press("ArrowLeft");
+  await expect(page.locator("#quick-progress")).toHaveText("1 / 4");
+  await page.keyboard.press("ArrowRight");
+  await expect(page.locator("#quick-progress")).toHaveText("2 / 4");
+  await expect.poll(() => model.audio.at(-1)).toContain("event=1");
+  await page.keyboard.press("ArrowLeft");
+  await expect(page.locator("#quick-progress")).toHaveText("1 / 4");
+  const markers = page.locator(".minimap-marker");
+  await markers.first().focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(page.locator("#quick-progress")).toHaveText("2 / 4");
+  await expect(markers.nth(1)).toBeFocused();
+  await expect(
+    page.locator('.minimap-marker[data-ignored="true"]'),
+  ).toHaveCount(0);
+  await expect(page.locator('.minimap-marker[data-staged="true"]')).toHaveCount(
+    0,
+  );
+  await page.keyboard.press("End");
+  await expect(page.locator("#quick-progress")).toHaveText("4 / 4");
+  await page.keyboard.press("ArrowRight");
+  await expect(page.locator("#quick-progress")).toHaveText("4 / 4");
+  await page.keyboard.press("n");
+  await expect(page.locator("#quick-progress")).toContainText(
+    "End of review queue",
+  );
+  await page.keyboard.press("ArrowLeft");
+  await expect(page.locator("#quick-progress")).toHaveText("4 / 4");
+});

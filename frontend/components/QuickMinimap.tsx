@@ -11,12 +11,14 @@ export function QuickMinimap({
   candidates,
   currentId,
   selected,
+  ignored,
   onSelect,
 }: {
   recording: Recording | undefined;
   candidates: Candidate[];
   currentId: number | undefined;
   selected: Set<number>;
+  ignored: Set<number>;
   onSelect: (id: number) => void;
 }) {
   const overview = recording?.overview;
@@ -46,9 +48,9 @@ export function QuickMinimap({
   return (
     <section className="quick-minimap" aria-label="Recording overview">
       <div className="minimap-heading">
-        <span>Recording overview</span>
         <span>
           ● Candidate <span className="minimap-staged-key">◆ Staged</span>
+          <span className="minimap-ignored-key">× Ignored</span>
         </span>
       </div>
       <div className="minimap-track">
@@ -69,18 +71,20 @@ export function QuickMinimap({
         <div
           className="minimap-markers"
           role="group"
-          aria-label="Candidate markers. Use arrow keys to browse, Enter to play."
+          aria-label="Candidate markers. Use arrow keys to select and play candidates."
         >
           {ordered.map((candidate, index) => {
             const active = candidate.id === currentId;
             const staged = selected.has(candidate.id);
-            const label = `Candidate ${candidate.id + 1} at ${candidate.timestamp}, ${candidate.level} confidence${staged ? ", staged for repair" : ""}`;
+            const isIgnored = !staged && ignored.has(candidate.id);
+            const label = `Candidate ${candidate.id + 1} at ${candidate.timestamp}, ${candidate.level} confidence${staged ? ", staged for repair" : isIgnored ? ", ignored" : ""}`;
             return (
               <button
                 key={candidate.id}
                 type="button"
                 className="minimap-marker"
                 data-staged={staged}
+                data-ignored={isIgnored}
                 aria-current={active ? "true" : undefined}
                 aria-label={label}
                 title={label}
@@ -89,6 +93,13 @@ export function QuickMinimap({
                 }}
                 onClick={() => onSelect(candidate.id)}
                 onKeyDown={(event) => {
+                  if (
+                    event.altKey ||
+                    event.ctrlKey ||
+                    event.metaKey ||
+                    event.repeat
+                  )
+                    return;
                   let next = index;
                   if (event.key === "ArrowLeft") next = Math.max(0, index - 1);
                   else if (event.key === "ArrowRight")
@@ -97,14 +108,18 @@ export function QuickMinimap({
                   else if (event.key === "End") next = ordered.length - 1;
                   else return;
                   event.preventDefault();
+                  event.stopPropagation();
                   const buttons =
                     event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>(
                       "button",
                     );
                   buttons?.[next]?.focus({ preventScroll: true });
+                  if (next !== index) onSelect(ordered[next].id);
                 }}
               >
-                <span aria-hidden="true">{staged ? "◆" : "●"}</span>
+                <span aria-hidden="true">
+                  {staged ? "◆" : isIgnored ? "×" : "●"}
+                </span>
               </button>
             );
           })}

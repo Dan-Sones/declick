@@ -14,11 +14,7 @@ export function QuickReview() {
       className="quick-page"
     >
       <div className="quick-heading">
-        <div>
-          <p className="eyebrow">LISTEN. DECIDE. NEXT.</p>
-          <h2 id="quick-title">Quick review</h2>
-          <p id="quick-recording">{recording?.name}</p>
-        </div>
+        <h2 id="quick-title">{recording?.name || "Choose a recording"}</h2>
         <label>
           {"Confidence "}
           <select
@@ -38,6 +34,7 @@ export function QuickReview() {
         candidates={s.queue}
         currentId={quickItem?.id}
         selected={selected}
+        ignored={m.ignored}
         onSelect={m.jumpQuick}
       />
       <div className="quick-details">
@@ -106,7 +103,12 @@ export function QuickReview() {
               view={s.view}
             />
           </div>
-          <p id="quick-fix-note">
+          <p
+            id="quick-fix-note"
+            className={
+              m.wave && !m.wave.repair_error ? "quick-chart-key" : undefined
+            }
+          >
             {m.wave?.repair_error ||
               (!m.wave
                 ? "Loading waveform…"
@@ -114,7 +116,13 @@ export function QuickReview() {
           </p>
         </article>
       </div>
-      <p id="quick-status" role="status" aria-live="polite">
+      <p
+        id="quick-status"
+        ref={m.quickStatusRef}
+        tabIndex={-1}
+        role="status"
+        aria-live="polite"
+      >
         {quickItem
           ? m.quickStatus
           : "End of review queue. Revisit candidates using the timeline, or export your selected repairs below as a separate copy. Nothing has been exported yet."}
@@ -155,19 +163,6 @@ export function QuickReview() {
           M · Replay
         </button>
       </div>
-      <p>
-        Select a point on the overview to jump and listen. P goes back · Y
-        stages · N leaves unchanged · M replays original. Going back keeps your
-        decisions; press Y or N to revise them. Export a new copy when ready.
-      </p>
-      <button
-        id="quick-restart"
-        className="button secondary small"
-        ref={m.quickRestart}
-        onClick={() => m.startQuickReview()}
-      >
-        Review again
-      </button>
       <div id="quick-repair-slot">{s.view === "quick" && <RepairPanel />}</div>
     </section>
   );
