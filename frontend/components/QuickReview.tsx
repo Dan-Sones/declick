@@ -1,6 +1,7 @@
 import { useInspectorContext } from "../app/InspectorContext";
 import type { Confidence } from "../types/audio";
 import { WaveformCanvas } from "./WaveformCanvas";
+import { QuickMinimap } from "./QuickMinimap";
 import { RepairPanel } from "./RepairPanel";
 
 export function QuickReview() {
@@ -13,11 +14,7 @@ export function QuickReview() {
       className="quick-page"
     >
       <div className="quick-heading">
-        <div>
-          <p className="eyebrow">LISTEN. DECIDE. NEXT.</p>
-          <h2 id="quick-title">Quick review</h2>
-          <p id="quick-recording">{recording?.name}</p>
-        </div>
+        <h2 id="quick-title">{recording?.name || "Choose a recording"}</h2>
         <label>
           {"Confidence "}
           <select
@@ -32,13 +29,21 @@ export function QuickReview() {
           </select>
         </label>
       </div>
-      <div className="quick-pills">
-        <span id="quick-progress" className="pill">
+      <QuickMinimap
+        recording={recording}
+        candidates={s.queue}
+        currentId={quickItem?.id}
+        selected={selected}
+        ignored={m.ignored}
+        onSelect={m.jumpQuick}
+      />
+      <div className="quick-details">
+        <span id="quick-progress" className="quick-detail">
           {quickItem
             ? `${s.quickIndex + 1} / ${s.queue.length}`
-            : `Review complete · ${s.queue.length} candidates reviewed`}
+            : `End of review queue · ${s.queue.length} candidates`}
         </span>
-        <span id="quick-time" className="pill mono">
+        <span id="quick-time" className="mono">
           {quickItem
             ? quickItem.timestamp
             : `${selected.size} staged for repair`}
@@ -46,19 +51,19 @@ export function QuickReview() {
         <span
           id="quick-confidence"
           data-confidence={quickItem?.level}
-          className={`pill ${quickItem ? "" : "hidden"}`}
+          className={`quick-detail ${quickItem ? "" : "hidden"}`}
         >
           {quickItem &&
             `${quickItem.level} confidence · ${quickItem.confidence.toFixed(3)}`}
         </span>
         <span
           id="quick-duration"
-          className={`pill ${quickItem ? "" : "hidden"}`}
+          className={`quick-detail ${quickItem ? "" : "hidden"}`}
         >
           {quickItem &&
             `${quickItem.duration_ms.toFixed(3)} ms · Ch ${quickItem.channels.join(", ")}`}
         </span>
-        <span className="pill safe-pill">Original protected</span>
+        <span className="quick-protected">Original protected</span>
       </div>
       <div className={`comparison-grid ${quickItem ? "" : "hidden"}`}>
         <article className="plot-card">
@@ -98,7 +103,12 @@ export function QuickReview() {
               view={s.view}
             />
           </div>
-          <p id="quick-fix-note">
+          <p
+            id="quick-fix-note"
+            className={
+              m.wave && !m.wave.repair_error ? "quick-chart-key" : undefined
+            }
+          >
             {m.wave?.repair_error ||
               (!m.wave
                 ? "Loading waveform…"
@@ -106,10 +116,16 @@ export function QuickReview() {
           </p>
         </article>
       </div>
-      <p id="quick-status" role="status" aria-live="polite">
+      <p
+        id="quick-status"
+        ref={m.quickStatusRef}
+        tabIndex={-1}
+        role="status"
+        aria-live="polite"
+      >
         {quickItem
           ? m.quickStatus
-          : "All done. Export your selected repairs below as a separate copy. Nothing has been exported yet."}
+          : "End of review queue. Revisit candidates using the timeline, or export your selected repairs below as a separate copy. Nothing has been exported yet."}
       </p>
       <div className="quick-actions">
         <button
@@ -147,19 +163,6 @@ export function QuickReview() {
           M · Replay
         </button>
       </div>
-      <p>
-        P goes back · Y stages · N leaves unchanged · M replays original. Going
-        back keeps your decisions; press Y or N to revise them. Export a new
-        copy when ready.
-      </p>
-      <button
-        id="quick-restart"
-        className="button secondary small"
-        ref={m.quickRestart}
-        onClick={() => m.startQuickReview()}
-      >
-        Review again
-      </button>
       <div id="quick-repair-slot">{s.view === "quick" && <RepairPanel />}</div>
     </section>
   );

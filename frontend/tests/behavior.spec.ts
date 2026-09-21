@@ -113,10 +113,10 @@ test("quick keyboard review, previous, revised decisions, replay and completion"
   await expect(page.locator("#quick-status")).toContainText("too long");
   await page.keyboard.press("n");
   await expect(page.locator("#quick-progress")).toHaveText(
-    "Review complete · 4 candidates reviewed",
+    "End of review queue · 4 candidates",
   );
   await expect(page.locator("#quick-time")).toHaveText("2 staged for repair");
-  await expect(page.locator("#quick-restart")).toBeFocused();
+  await expect(page.locator("#quick-status")).toBeFocused();
   await page.keyboard.press("p");
   await expect(page.locator("#quick-progress")).toHaveText("4 / 4");
   await page.locator("#quick-filter").selectOption("high");
@@ -322,10 +322,38 @@ test("switching recordings starts a review for the selected file", async ({
   await page.locator(".file-button").nth(1).click();
   await page.locator("#go-quick").click();
   await expect(page.locator("#quick-progress")).toHaveText("1 / 1");
-  await expect(page.locator("#quick-recording")).toHaveText(
-    "Second synthetic.wav",
-  );
+  await expect(page.locator("#quick-title")).toHaveText("Second synthetic.wav");
   await expect(page.locator("#selection-summary")).toHaveText(
     "No candidates selected",
   );
+});
+
+test("loading the page and importing audio stay silent until a review action", async ({
+  page,
+}) => {
+  const model = await mockApi(page);
+  await page.goto("/");
+  await expect(page.locator("#continue-review")).toBeVisible();
+  expect(model.audio).toHaveLength(0);
+  const upload = {
+    name: "synthetic.wav",
+    mimeType: "audio/wav",
+    buffer: syntheticWav(),
+  };
+  await page.locator("#audio-file").setInputFiles(upload);
+  await expect(page.locator("#quick-status")).toHaveText(
+    "Select a candidate or press Replay to listen.",
+  );
+  expect(model.audio).toHaveLength(0);
+  await page.locator("#quick-replay").click();
+  await expect.poll(() => model.audio.length).toBeGreaterThan(0);
+  await page.locator("#go-home").click();
+  const count = model.audio.length;
+  await page.locator("#audio-file").setInputFiles(upload);
+  await expect(page.locator("#quick-status")).toHaveText(
+    "Select a candidate or press Replay to listen.",
+  );
+  expect(model.audio).toHaveLength(count);
+  await page.locator("#quick-no").click();
+  await expect.poll(() => model.audio.length).toBeGreaterThan(count);
 });

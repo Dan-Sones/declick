@@ -8,6 +8,7 @@ export function useQuickAudio(
   replay: number,
 ) {
   const [status, setStatus] = useState("");
+  const [enabled, setEnabled] = useState(false);
   const context = useRef<AudioContext | null>(null);
   const playback = useRef<{
     source: AudioBufferSourceNode;
@@ -16,10 +17,15 @@ export function useQuickAudio(
   const unlock = useCallback(() => {
     context.current ??= new AudioContext();
     void context.current.resume().catch(() => {});
+    setEnabled(true);
   }, []);
 
   useEffect(() => {
     if (!active || !fileId || eventId === undefined) return;
+    if (!enabled) {
+      setStatus("Select a candidate or press Replay to listen.");
+      return;
+    }
     const controller = new AbortController();
     setStatus("Loading original audio…");
     async function play() {
@@ -73,7 +79,7 @@ export function useQuickAudio(
       };
       source.stop(now + 0.01);
     };
-  }, [fileId, eventId, active, replay]);
+  }, [fileId, eventId, active, replay, enabled]);
 
   useEffect(
     () => () => {
@@ -81,5 +87,6 @@ export function useQuickAudio(
     },
     [],
   );
-  return { status, setStatus, unlock };
+  const silence = useCallback(() => setEnabled(false), []);
+  return { status, setStatus, unlock, silence };
 }

@@ -59,6 +59,13 @@ export const recordings: Recording[] = [
     name: "Synthetic recording.wav",
     path: "/example/recording.wav",
     events: candidates,
+    overview: {
+      frames: 48000,
+      buckets: Array.from({ length: 256 }, (_, i) => {
+        const amplitude = 0.15 + 0.6 * Math.abs(Math.sin(i * 0.035));
+        return [-amplitude, amplitude];
+      }),
+    },
     stats: {
       sample_rate: 48000,
       channels: 2,

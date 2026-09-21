@@ -28,6 +28,20 @@ from .repair import (
 )
 
 
+def waveform_overview(samples: np.ndarray) -> dict[str, Any]:
+    """Retain a bounded envelope, including peaks on every channel."""
+    frames = len(samples)
+    count = min(frames, 2048)
+    if not count:
+        return {"frames": 0, "buckets": []}
+    edges = np.linspace(0, frames, count + 1, dtype=np.int64)
+    buckets = [
+        [float(samples[lo:hi].min()), float(samples[lo:hi].max())]
+        for lo, hi in zip(edges[:-1], edges[1:])
+    ]
+    return {"frames": frames, "buckets": buckets}
+
+
 @dataclass(frozen=True)
 class ScanResult:
     id: str
@@ -36,6 +50,7 @@ class ScanResult:
     events: list[Detection]
     sha256: str
     repair_error: str | None = None
+    overview: dict[str, Any] | None = None
 
     def summary(self) -> dict[str, Any]:
         return {
@@ -44,6 +59,7 @@ class ScanResult:
             "path": str(self.path),
             "stats": asdict(self.stats),
             "sha256": self.sha256,
+            **({"overview": self.overview} if self.overview is not None else {}),
             "repair_error": self.repair_error,
             "events": [
                 {
@@ -127,7 +143,10 @@ class ScanState:
                         pcm_layout(path)
                     except RepairError as exc:
                         repair_error = str(exc)
-                    result = ScanResult(uuid.uuid4().hex, path, analyse_audio(audio), events, digest, repair_error)
+                    result = ScanResult(
+                        uuid.uuid4().hex, path, analyse_audio(audio), events, digest,
+                        repair_error, waveform_overview(audio.data),
+                    )
                     del audio
                     with self.lock:
                         self.results[result.id] = result

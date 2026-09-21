@@ -27,7 +27,6 @@ export function Header({ theme, onToggleTheme }: Props) {
         </span>
       </a>
       <div className="topbar-right">
-        <span className="local-indicator">Local workspace</span>
         <button
           id="theme-toggle"
           className="button secondary small theme-toggle"

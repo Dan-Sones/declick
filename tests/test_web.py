@@ -13,7 +13,7 @@ import numpy as np
 import pytest
 import soundfile as sf
 
-from click_detector.web import ScanState, UIServer, preview_audio, waveform
+from click_detector.web import ScanState, UIServer, preview_audio, waveform, waveform_overview
 
 
 @pytest.fixture
@@ -206,3 +206,33 @@ def test_repair_api_requires_explicit_valid_selections(http_ui) -> None:
         payload = json.dumps({"file": result.id, "selected": selection})
         assert request(server, "POST", "/api/repair", payload, {"Content-Type": "application/json"})[0] == 400
     assert not state.output_root.exists()
+
+
+@pytest.mark.parametrize("frames", [0, 1, 17, 2048, 2051, 48000])
+def test_overview_bounds_and_channel_extrema(frames: int) -> None:
+    mono = np.linspace(0.1, 0.9, frames, dtype=np.float32)
+    samples = np.column_stack((mono, -mono))
+    overview = waveform_overview(samples)
+    assert overview["frames"] == frames
+    assert len(overview["buckets"]) == min(frames, 2048)
+    edges = np.linspace(0, frames, min(frames, 2048) + 1, dtype=np.int64)
+    for (lo, hi), bucket in zip(zip(edges[:-1], edges[1:]), overview["buckets"]):
+        assert bucket == [float(samples[lo:hi].min()), float(samples[lo:hi].max())]
+        assert bucket[0] < 0 < bucket[1]  # Opposite channels must not cancel.
+
+
+def test_overview_silence_and_boundary_peaks() -> None:
+    samples = np.zeros((48000, 1), dtype=np.float32)
+    assert all(bucket == [0.0, 0.0] for bucket in waveform_overview(samples)["buckets"])
+    samples[0, 0], samples[-1, 0] = -0.75, 0.5
+    overview = waveform_overview(samples)
+    assert overview["buckets"][0] == [-0.75, 0.0]
+    assert overview["buckets"][-1] == [0.0, 0.5]
+
+
+def test_scan_publishes_bounded_overview(recording: Path) -> None:
+    original = recording.read_bytes()
+    result = scan(recording).snapshot()["files"][0]
+    assert result["overview"]["frames"] == 48000
+    assert len(result["overview"]["buckets"]) == 2048
+    assert recording.read_bytes() == original
